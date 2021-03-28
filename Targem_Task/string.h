@@ -118,6 +118,4 @@ namespace _str
 
 }
 
-
-
 #endif _STRING_H_

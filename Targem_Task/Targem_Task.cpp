@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <fstream>
+#include <utility>
 
 #include <vector>
 #include <conio.h>
@@ -156,8 +157,7 @@ int main(int argc, char* argv[])
 	}
 	*/
 
-
-
+	//основной блок
 	std::ifstream File("input.txt");
 	if (File.is_open())
 	{
@@ -197,7 +197,61 @@ int main(int argc, char* argv[])
 		createFile(ArgVector, buff);
 	}
 	buff.close();
+	
+
+	//проверка семантики
+	/*
+	char ara[] = "coppying me";
+
+	std::cout << "array befor:" << std::endl;
+	for (int i = 0; i < strlen(ara); i++)
+	{
+		std::cout << ara[i];
+	}
+
+	std::cout << std::endl;
+	std::cout << std::endl;
+
+	_str::string ara1(std::move(ara));
 
 
+	std::cout << "array after:" << std::endl;
+	for (int i = 0; i < strlen(ara); i++) 
+	{
+		std::cout << ara[i];
+	}
+
+	std::cout << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "ara1 befor:" << std::endl;
+	std::cout << ara1 << std::endl;
+	std::cout << std::endl;
+
+	_str::string ara2(std::move(ara1));
+
+	std::cout << "ara1 after:" << std::endl;
+	std::cout << ara1 << std::endl;
+	std::cout << "ara2:" << std::endl;
+	std::cout << ara2 << std::endl;
+	*/
+
+	/*
+	//вывод 
+		array befor:
+		coppying me
+
+		array after:
+		coppying me
+
+		ara1 befor:
+		coppying me
+		
+		ara1 after:
+
+		ra2:
+		coppying me
+	*/
+	
 	_getch();
 }

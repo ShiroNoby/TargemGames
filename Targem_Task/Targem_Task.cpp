@@ -1,5 +1,4 @@
 ﻿#include <iostream>
-#include <fstream>
 #include <vector>
 #include <conio.h>
 #include "string.h"
@@ -15,7 +14,7 @@ void swap(char& a, char& b)
 
 bool string_sort(const _str::string& str1, const _str::string& str2)
 {
-	for (int index = 0; index < str1.get(); index++)
+	for (int index = 0; index < str1.get_length(); index++)
 	{
 		if (str1[index] < str2[index]) { return true; }
 	}
@@ -25,7 +24,7 @@ bool string_sort(const _str::string& str1, const _str::string& str2)
 //я не начинаю сортировку с vector[0], поскольку 0 элемен несет имя программы
 void vector_sort(std::vector<_str::string>& vector)
 {
-	for (int i = 0; i < vector.size(); i++)
+	for (int i = 1; i < vector.size(); i++)
 	{
 		for (int j = i + 1; j < vector.size(); j++)
 		{
@@ -34,67 +33,22 @@ void vector_sort(std::vector<_str::string>& vector)
 	}
 }
 
-//пишем построчно из файла в вектор
-void BUFFER(std::ifstream& File, std::vector<_str::string>& vector)
-{
-	char* buff = new char[32767];
-	for (int index = 0; !File.eof(); index++)
-	{
-		File.getline(buff, 32767, '\n');
-		vector.push_back(buff);
-	}
-	delete[] buff;
-}
-
-void createFile(std::vector<_str::string>& vector, std::ofstream& File)
-{
-	for (int i = 0; i < vector.size(); i++)
-	{
-		File << vector[i] << std::endl;
-	}
-}
 
 int main(int argc, char* argv[])
 {
-	
 	std::vector<_str::string> ArgVector;
 
-	
-	//основной блок
-	std::ifstream File("input.txt");
-	if (File.is_open())
+	for (int i = 0; i < argc; i++) 
 	{
-		std::cout << "file is open" << std::endl;
-
-		BUFFER(File, ArgVector);
-
-		for (int i = 0; i < ArgVector.size(); i++)
-		{
-			std::cout << ArgVector[i] << std::endl;
-		}
-		std::cout << std::endl;
+		ArgVector.push_back(argv[i]);
 	}
-	File.close();
 
-	//sort string
-	//сравниваем поэлементно каждые строки
 	vector_sort(ArgVector);
-	std::cout << std::endl;
 
-
-	for (int i = 0; i < ArgVector.size(); i++)
+	for (int i = 1; i < argc; i++) 
 	{
 		std::cout << ArgVector[i] << std::endl;
 	}
-	std::cout << std::endl;
-
-	std::ofstream buff("output.txt");
-
-	if (buff.is_open())
-	{
-		createFile(ArgVector, buff);
-	}
-	buff.close();
 	
 	_getch();
 }

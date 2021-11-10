@@ -27,7 +27,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="string.h">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="garb.txt" />
   </ItemGroup>
 </Project>

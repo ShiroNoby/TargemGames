@@ -1,54 +1,39 @@
 ﻿#include <iostream>
 #include <vector>
-#include <conio.h>
 #include "string.h"
 
-//nevermind
-void swap(char& a, char& b)
+void vector_sort(std::vector<string::CString>& vector)
 {
-	char tmp;
-	tmp = a;
-	a = b;
-	b = tmp;
-}
-
-bool string_sort(const _str::string& str1, const _str::string& str2)
-{
-	for (int index = 0; index < str1.get_length(); index++)
-	{
-		if (str1[index] < str2[index]) { return true; }
-	}
-	return false;
-}
-
-//я не начинаю сортировку с vector[0], поскольку 0 элемен несет имя программы
-void vector_sort(std::vector<_str::string>& vector)
-{
-	for (int i = 1; i < vector.size(); i++)
+	for (int i = 0; i < vector.size(); i++)
 	{
 		for (int j = i + 1; j < vector.size(); j++)
 		{
-			if (string_sort(vector[i], vector[j])) { vector[i].swap(vector[j]); }
+			if (vector[i] < vector[j]) { vector[i].swap(vector[j]); }
 		}
 	}
 }
 
-
 int main(int argc, char* argv[])
 {
-	std::vector<_str::string> ArgVector;
-
-	for (int i = 0; i < argc; i++) 
+	std::vector<string::CString> ArgVector;
+	
+	while (std::cin) 
 	{
-		ArgVector.push_back(argv[i]);
-	}
+		char TMP_ch[120];
+		std::cin.getline(TMP_ch, 120);
+		
+		if (TMP_ch[0] == '\0') { break; }
 
-	vector_sort(ArgVector);
-
-	for (int i = 1; i < argc; i++) 
-	{
-		std::cout << ArgVector[i] << std::endl;
+		string::CString str1(TMP_ch);
+		ArgVector.push_back(std::move(str1));
 	}
 	
-	_getch();
+	vector_sort(ArgVector);
+
+	for (int i = 0; i < ArgVector.size(); i++)
+	{
+		std::cout << ArgVector[i].get_char() << std::endl;
+	}
+
+	system("pause");
 }

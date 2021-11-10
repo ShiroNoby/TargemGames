@@ -1,194 +1,283 @@
-//я мог бы вынести это в отдельный файл, но не буду
 #include "string.h"
 
-namespace _str 
+using namespace string;
+
+//
+int size_strlen(const char* data) 
 {
-	//*init m_length
-	//default empty constructor
-	string::string()
-		:m_data(nullptr), m_length(0) {}
+	int sum = 0;
+	int i = 0;
+	while (data[i]) { ++sum;++i; }
+	return sum;
+}
 
 
-	//constructor coppying
-	string::string(const _str::string& str)
+/////////////////**************************************************************\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+//ctor
+CString::CString():m_length(0), m_data(nullptr)					{}
+
+//ctor
+CString::CString(const CString& str) : m_length(str.m_length), m_data(nullptr)
+{
+	m_data = new char[static_cast<__int64>(m_length) + 1];
+
+	for (int i = 0; i < m_length; i++)
 	{
-		
-		//запрос памяти для новых данных
-		this->m_length = str.m_length;
-		this->m_data = new char[this->m_length + 1];
-
-		//копирование данных
-		for (int i = 0; i < str.m_length; i++)
-		{
-			this->m_data[i] = str.m_data[i];
-		}
-
-		//точка останова
-		this->m_data[m_length] = '\0';
-		
-		//где нуль-термин
-		//что со старыми данными?
+		m_data[i] = str.m_data[i];
 	}
 
-	//constructor coppying
-	string::string(const char* data)
-	{
-		
-		//запрос памяти для новых данных
-		this->m_length = strlen(data);
-		this->m_data = new char[strlen(data) + 1];
-
-		//копирование данных
-		for (int i = 0; i < m_length; i++)
-		{
-			this->m_data[i] = data[i];
-		}
-
-		//точка останова
-		this->m_data[m_length] = '\0';
-
-		//где нуль-термин
-		//что со старыми данными?
-	}
-
-	//operator coppying
-	void string::operator=(_str::string str)
-	{
-		//чистка старых данных
-		if (this->m_data)
-		{
-			delete[] m_data;
-			this->m_data = nullptr;
-			this->m_length = 0;
-		}
-
-		//запрос памяти для новых данных
-		this->m_length = str.m_length;
-		this->m_data = new char[this->m_length + 1];
-
-		//копирование данных
-		for (int i = 0; i < str.m_length; i++)
-		{
-			this->m_data[i] = str.m_data[i];
-		}
-
-		//точка останова
-		this->m_data[m_length] = '\0';
-
-		//где нуль-термин
-		//что со старыми данными?
-	}
-
-	//move-operator
-	void string::operator=(_str::string& str)
-	{
-		//чистка старых данных
-		if (this->m_data)
-		{
-			delete[] m_data;
-			this->m_data = nullptr;
-			this->m_length = 0;
-		}
-
-		//отжимаем указатель и размер строки
-		this->m_length = str.m_length;
-		this->m_data = str.m_data;;
-
-
-		//убираем свидетелей
-		str.m_length = 0;
-		str.m_data = nullptr;
-	}
-
-	//эт что такое?
-	char& string::operator[](int index) const
-	{
-		return m_data[index];
-	}
-
-	//str.swap(str1)
-	void string::swap(_str::string& str)
-	{
-		//чую косяк с памятью 
-
-		//делаем времянку
-		_str::string tmp;
-		
-		//присваиваем временной строке значение строки а
-		tmp = std::move(*this);
-
-		//присваиваем строке а значение строки б
-		*this = std::move(str);
-
-		//присваиваем строке б значение из временной строки
-		str = std::move(tmp);
-	}
-
-	//измение имя
-	int string::get_length() const
-	{ 
-		return m_length;
-	}
+	m_data[m_length] = '\0';
 	
-	std::ostream& operator<<(std::ostream& out, const string& str)
+	
+	return;	
+}
+
+//ctor
+CString::CString(CString&& str) noexcept :m_length(str.m_length), m_data(str.m_data)
+{
+	str.m_length = 0;
+	str.m_data = nullptr;
+}
+
+//ctor
+CString::CString(const char* data)	: m_length(size_strlen(data)), m_data(nullptr)
+{	
+	m_data = new char[static_cast<__int64>(m_length) + 1];
+
+	for (int i = 0; i < m_length; i++) 
 	{
-		std::cout << str.m_data;
-
-		return out;
-
-		//переделать с использованием терминатора
+		m_data[i] = data[i];
 	}
 
-	_str::string& operator+(_str::string& str1, _str::string& str2)
+	m_data[m_length] = '\0';
+}
+
+// dtor
+CString::~CString()												
+{
+	if (m_data == nullptr) return;
+
+	delete [] m_data;
+	m_data = nullptr; 					
+}
+
+
+//////////////////operator
+/////////////////**************************************************************\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+//operator
+char& CString::operator[](int index) 
+{
+	if (index >= 0 && index < m_length) return m_data[index];
+}
+
+
+//operator
+const char& CString::operator[](int index) const
+{
+	if (index >= 0 && index < m_length) return m_data[index];
+}
+
+
+//operator
+CString& CString::operator=(const char* data)
+{
+	if (!data) { return *this; }
+
+	m_length = size_strlen(data);
+	delete[] m_data;
+	m_data = new char[static_cast<__int64>(m_length) + 1];
+
+	for (int i = 0; i < m_length; i++)
 	{
-		////запрос памяти для новых данных
-		//_str::string str;
-		//str.m_length = (str1.m_length + str2.m_length); 
-		//str.m_data = new char[str.m_length + 1];
-
-		//int i = 0;
-
-		_str::string tmp;
-		tmp = std::move(str1);
-
-		//чистка старых данных
-		if (str1.m_data)
-		{
-			delete[] str1.m_data;
-			str1.m_data = nullptr;
-			str1.m_length = 0;
-		}
-
-		//запрос памяти для новых данных
-		str1.m_length = str2.m_length + tmp.m_length;
-		str1.m_data = new char[str1.m_length + 1];
-
-		int i = 0;
-
-		//копирование данных строки а
-		for (int index = 0; index < tmp.m_length; i++, index++)
-		{
-			str1.m_data[i] = tmp.m_data[index];
-		}
-
-		//копирование данных строки б
-		for (int index = 0; index < str2.m_length; index++, i++ )
-		{
-			str1.m_data[i] = str2.m_data[index];
-		}
-
-		//точка останова
-		str1.m_data[str1.m_length] = '\0';
-
-		//терминатор
-		//вернуть ссылку
-		return str1;
+		m_data[i] = data[i];
 	}
 
-	string::~string()
+	m_data[m_length] = '\0';
+	return *this;
+}
+
+
+//operator
+CString& CString::operator=(CString& str)
+{
+	if (!str.m_data) { return *this; }
+	if (this->m_data == str.m_data) { return *this; }
+
+	m_length = str.m_length;
+	delete[] m_data;
+	m_data = new char[static_cast<__int64>(m_length) + 1];
+
+	for (int i = 0; i < m_length; i++)
 	{
-		//проверка данных
-		delete[] m_data;
-		m_data = nullptr;
+		m_data[i] = str.m_data[i];
 	}
+
+	m_data[m_length] = '\0';
+	return *this;
+}
+
+
+//operator
+CString& CString::operator=(CString&& str) noexcept
+{
+	if (!str.m_data) { return *this; }
+	if (this->m_data == str.m_data) { return *this; }
+
+	delete[] m_data;
+
+	m_length = str.m_length;
+	m_data = str.m_data;
+
+	str.m_length = 0;
+	str.m_data = nullptr;
+
+	return *this;
+}
+
+
+//operator
+bool CString::operator<(const CString& str) const
+{
+	for (int index = 0; index < this->get_length(); index++)
+	{
+		if (this->m_data[index] < str[index]) { return true; }
+		if (this->m_data[index] > str[index]) { return false; }
+	}
+
+	return false;
+}
+
+
+//operator
+bool CString::operator>(const CString& str) const
+{
+	return str < *this;
+}
+
+
+//////////////////concatination
+/////////////////**************************************************************\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+//concatination
+CString& CString::operator+(string::CString& str)
+{
+	CString sum;
+	
+	//bcos str1 + ' ' + str2
+	sum.m_length = this->m_length + 1 + str.m_length;
+
+	sum.m_data = new char[static_cast<__int64>(sum.m_length) + 1];
+
+	int index = 0;
+	if (this->m_length)
+	{
+		for (index; index < this->m_length; index++)
+		{
+			sum.m_data[index] = this->m_data[index];
+		}
+
+		sum.m_data[index] = ' ';
+		++index;
+	}
+
+	for (int i = 0; i < str.m_length; i++, index++)
+	{
+		sum.m_data[index] = str.m_data[i];
+	}
+
+	sum.m_data[sum.m_length] = '\0';
+		
+	*this = sum;
+	return *this;
+}
+
+
+//concatination
+CString& CString::operator+(const char* data)
+{
+	CString sum;
+
+	//bcos str1 + ' ' + str2
+	sum.m_length = this->m_length + 1 + size_strlen(data);
+
+	sum.m_data = new char[static_cast<__int64>(sum.m_length) + 1];
+
+	int index = 0;
+	if (this->m_length)
+	{
+		for (index; index < this->m_length; index++)
+		{
+			sum.m_data[index] = this->m_data[index];
+		}
+
+		sum.m_data[index] = ' ';
+		++index;
+	}
+
+	for (int i = 0; i < size_strlen(data); i++, index++)
+	{
+		sum.m_data[index] = data[i];
+	}
+
+	sum.m_data[sum.m_length] = '\0';
+	
+	*this = sum;
+	return *this;
+}
+
+
+//extra-concatination
+CString	string::operator+(const char* data, string::CString& str2)
+{
+	CString sum;
+
+	//bcos str1 + ' ' + str2
+	sum.m_length = size_strlen(data) + 1 + str2.m_length;
+
+	sum.m_data = new char[static_cast<__int64>(sum.m_length) + 1];
+
+	int index = 0;
+	for (index; index < size_strlen(data); index++)
+	{
+		sum.m_data[index] = data[index];
+	}
+
+	sum.m_data[index] = ' ';
+	++index;
+
+	for (int i = 0; i < str2.m_length; i++, index++)
+	{
+		sum.m_data[index] = str2.m_data[i];
+	}
+
+	sum.m_data[sum.m_length] = '\0';
+	return sum;
+}
+
+
+//get
+const char* CString::get_char() const
+{
+	if (m_data) return m_data;
+
+	return "nullString";
+}
+
+
+//get
+int CString::get_length() const	{ return m_length; }
+
+
+//
+void CString::swap(string::CString& str) 
+{
+	CString tmp;
+
+	tmp = static_cast<string::CString&&>(str);
+	str = static_cast<string::CString&&>(*this);
+	*this = static_cast<string::CString&&>(tmp);
 }

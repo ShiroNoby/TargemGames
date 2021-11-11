@@ -30,7 +30,6 @@ CString::CString(const CString& str) : m_length(str.m_length), m_data(nullptr)
 
 	m_data[m_length] = '\0';
 	
-	
 	return;	
 }
 

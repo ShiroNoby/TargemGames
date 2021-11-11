@@ -10,12 +10,12 @@ namespace string
 	public:
 		
 		///ctor/dtor
-							CString();
-							~CString();
+						CString();
+						~CString();
 
 		explicit			CString( const char* data );	
-							CString( const CString& str );
-							CString( CString&& str ) noexcept;
+						CString( const CString& str );
+						CString( CString&& str ) noexcept;
 						
 	
 		//operators
@@ -32,18 +32,18 @@ namespace string
 		//concatination
 		CString&			operator+( CString& str );
 		CString&			operator+( const char* data );
-		friend CString		operator+( const char* data, string::CString& str2 );
+		friend CString			operator+( const char* data, string::CString& str2 );
 				
 		//gets
 		const char*			get_char() const;
-		int					get_length() const;
+		int				get_length() const;
 		
 		//
 		void				swap( CString& str );
 
 	private:
 
-		int					m_length;
+		int				m_length;
 		char*				m_data; //rework in uniqPointer
 	};
 } // namespace string

@@ -1,120 +1,92 @@
+
 #include "string.h"
 
 using namespace string;
 
-//
-int size_strlen(const char* data) 
+//проверить пустую строку
+uint32_t size_strlen(const char* data)
 {
-	int sum = 0;
+	assert(data && "data is null");
+
+	uint32_t sum = 0;
 	int i = 0;
 	while (data[i]) { ++sum;++i; }
 	return sum;
 }
 
 
-/////////////////**************************************************************\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
-//ctor
-CString::CString():m_length(0), m_data(nullptr)					{}
-
-//ctor
-CString::CString(const CString& str) : m_length(str.m_length), m_data(nullptr)
+//*****************************************************************************
+// dtor
+CString::~CString()												
 {
-	m_data = new char[static_cast<__int64>(m_length) + 1];
-
-	for (int i = 0; i < m_length; i++)
+	if(!this->empty()) 
 	{
-		m_data[i] = str.m_data[i];
-	}
-
-	m_data[m_length] = '\0';
-	
-	return;	
+		delete[] m_data;
+		m_data = nullptr;
+	}					
 }
 
+
+//*****************************************************************************
 //ctor
+CString::CString(uint32_t size) : m_length(size), m_data(nullptr)
+{
+	//new data + '\0'
+	Allocate(m_length + 1);
+}
+
+
+//ctor
+CString::CString(const char* data)	: m_length(size_strlen(data)), m_data(nullptr)
+{	
+	//???
+	//str("") is bad...
+	//if(m_length == 0) return;
+
+	//new data + '\0'
+	Allocate(m_length + 1);
+	Access(data);
+}
+
+
+CString::CString(const CString& str) : m_length(str.m_length), m_data(nullptr)
+{
+	
+	//CString str1 == str2();
+	if (str.empty()) { return; }
+
+	//new data + '\0'
+	Allocate(m_length + 1);
+	Access(str.m_data);	
+}
+
+
 CString::CString(CString&& str) noexcept :m_length(str.m_length), m_data(str.m_data)
 {
 	str.m_length = 0;
 	str.m_data = nullptr;
 }
 
-//ctor
-CString::CString(const char* data)	: m_length(size_strlen(data)), m_data(nullptr)
-{	
-	m_data = new char[static_cast<__int64>(m_length) + 1];
 
-	for (int i = 0; i < m_length; i++) 
-	{
-		m_data[i] = data[i];
-	}
-
-	m_data[m_length] = '\0';
-}
-
-// dtor
-CString::~CString()												
-{
-	if (m_data == nullptr) return;
-
-	delete [] m_data;
-	m_data = nullptr; 					
-}
-
-
-//////////////////operator
-/////////////////**************************************************************\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-//operator
-char& CString::operator[](int index) 
-{
-	if (index >= 0 && index < m_length) return m_data[index];
-}
-
-
-//operator
-const char& CString::operator[](int index) const
-{
-	if (index >= 0 && index < m_length) return m_data[index];
-}
-
-
-//operator
-CString& CString::operator=(const char* data)
-{
-	if (!data) { return *this; }
-
-	m_length = size_strlen(data);
-	delete[] m_data;
-	m_data = new char[static_cast<__int64>(m_length) + 1];
-
-	for (int i = 0; i < m_length; i++)
-	{
-		m_data[i] = data[i];
-	}
-
-	m_data[m_length] = '\0';
-	return *this;
-}
-
-
+//*****************************************************************************
 //operator
 CString& CString::operator=(CString& str)
 {
-	if (!str.m_data) { return *this; }
-	if (this->m_data == str.m_data) { return *this; }
+	//str1 = str2();
+	if (str.empty()) { return *this; }
 
-	m_length = str.m_length;
+	//str1 = str1;
+	if (*this == str) { return *this; }
+
+	
 	delete[] m_data;
-	m_data = new char[static_cast<__int64>(m_length) + 1];
+	m_length = str.m_length;
 
-	for (int i = 0; i < m_length; i++)
-	{
-		m_data[i] = str.m_data[i];
-	}
 
-	m_data[m_length] = '\0';
+	//new data + '\0'
+	Allocate(m_length + 1);
+	Access(str.m_data);
+
 	return *this;
 }
 
@@ -122,10 +94,15 @@ CString& CString::operator=(CString& str)
 //operator
 CString& CString::operator=(CString&& str) noexcept
 {
-	if (!str.m_data) { return *this; }
-	if (this->m_data == str.m_data) { return *this; }
+	//str1 = str2();
+	if (str.empty()) { return *this; }
+
+	//str1 = str1;
+	if (*this == str) { return *this; }
+
 
 	delete[] m_data;
+
 
 	m_length = str.m_length;
 	m_data = str.m_data;
@@ -137,142 +114,189 @@ CString& CString::operator=(CString&& str) noexcept
 }
 
 
-//operator
-bool CString::operator<(const CString& str) const
+//*****************************************************************************
+//new
+void CString::Allocate(uint32_t size)
 {
-	for (int index = 0; index < this->get_length(); index++)
+	if(!this->empty()) delete[] m_data;
+	
+	assert(size && "Bad alloce size");
+
+	m_data = new char[size];
+}
+
+
+//m_data[] = data[]
+void CString::Access(const char* data)
+{
+	assert(data && "fail access(data)");
+	//???
+	//assert(m_length && "fail access(size)");
+
+	for (uint32_t i = 0; i < m_length; i++)
 	{
-		if (this->m_data[index] < str[index]) { return true; }
-		if (this->m_data[index] > str[index]) { return false; }
+		m_data[i] = data[i];
+	}
+
+	m_data[m_length] = '\0';
+}
+
+
+//*****************************************************************************
+ //operators whithouth range check
+char& CString::operator[](uint32_t index)
+{
+	assert(!this->empty() && "Bad operator[]");
+
+	return m_data[index];
+}
+
+
+//operator whithouth range check
+const char& CString::operator[](uint32_t index) const
+{
+	assert(!this->empty() && "Bad operator[] const");
+
+	return m_data[index];
+}
+
+
+//operators whith range chek
+char& CString::at(uint32_t index)
+{
+	assert((index <= m_length) && "Bad range check");
+
+	return this->operator[](index);
+}
+
+
+//operators whith range chek
+const char& CString::at(uint32_t index) const
+{
+	assert((index <= m_length) && "Bad range check(const)");
+
+	return this->operator[](index);
+}
+
+
+//(ab|cdf)|(dgf)
+//(ab|bcd)|()
+//First cmp(str1, str2) then the rest
+bool CString::operator<(const CString& str) const 
+{
+	//so so slow, but i did it
+	if(*this == str) {return false;}
+
+	//str1() < str("") --> ret true
+	if(m_data == nullptr) { return true;}
+
+	if(m_length <= str.m_length)
+	{
+		for (uint32_t index = 0; index < m_length; index++)
+		{
+			if (this->m_data[index] < str[index]) { return true; }
+			if (this->m_data[index] > str[index]) { return false; }
+		}
+		return false;
+
+	}else{
+		
+		for (uint32_t index = 0; index < str.m_length; index++)
+		{
+			if (this->m_data[index] < str[index]) { return true; }
+			if (this->m_data[index] > str[index]) { return false; }
+		}
+		return false;
+	}
+}
+
+
+//so so(x2) so slow
+bool CString::operator>(const CString& str) const 
+{
+	//so so slow, but i did it... too
+	if (*this == str) { return false; }
+
+	return !(this->operator<(str));
+}
+
+
+//so slow
+bool CString::operator==(const CString& str) const
+{
+	if(m_length == str.m_length) 
+	{
+		for (uint32_t index = 0; index < m_length; index++)
+		{
+			if (this->operator[](index) != str[index]) { return false; }
+		}
+		return true;
 	}
 
 	return false;
 }
 
 
-//operator
-bool CString::operator>(const CString& str) const
-{
-	return str < *this;
-}
-
-
-//////////////////concatination
-/////////////////**************************************************************\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
+//*****************************************************************************
 //concatination
-CString& CString::operator+(string::CString& str)
+CString string::operator+(const CString& str1, const CString& str2)
 {
-	CString sum;
-	
-	//bcos str1 + ' ' + str2
-	sum.m_length = this->m_length + 1 + str.m_length;
+	CString summ(str1.length() + str2.length());
 
-	sum.m_data = new char[static_cast<__int64>(sum.m_length) + 1];
-
-	int index = 0;
-	if (this->m_length)
+	uint32_t index = 0;
+	for( ; index < str1.length(); index++ )
 	{
-		for (index; index < this->m_length; index++)
-		{
-			sum.m_data[index] = this->m_data[index];
-		}
-
-		sum.m_data[index] = ' ';
-		++index;
+		summ[index] = str1[index];
 	}
 
-	for (int i = 0; i < str.m_length; i++, index++)
+	for (uint32_t i = 0; i < str2.length(); index++, i++ )
 	{
-		sum.m_data[index] = str.m_data[i];
+		summ[index] = str2[i];
 	}
 
-	sum.m_data[sum.m_length] = '\0';
-		
-	*this = sum;
-	return *this;
+	summ[index] = '\0';
+
+	return summ;
 }
 
 
-//concatination
-CString& CString::operator+(const char* data)
-{
-	CString sum;
-
-	//bcos str1 + ' ' + str2
-	sum.m_length = this->m_length + 1 + size_strlen(data);
-
-	sum.m_data = new char[static_cast<__int64>(sum.m_length) + 1];
-
-	int index = 0;
-	if (this->m_length)
-	{
-		for (index; index < this->m_length; index++)
-		{
-			sum.m_data[index] = this->m_data[index];
-		}
-
-		sum.m_data[index] = ' ';
-		++index;
-	}
-
-	for (int i = 0; i < size_strlen(data); i++, index++)
-	{
-		sum.m_data[index] = data[i];
-	}
-
-	sum.m_data[sum.m_length] = '\0';
-	
-	*this = sum;
-	return *this;
+CString string::operator+(const CString& str, const char* data)
+{ 
+	string::CString tmp(data);
+	return str + tmp;
 }
 
 
-//extra-concatination
-CString	string::operator+(const char* data, string::CString& str2)
+CString string::operator+(const char* data, const CString& str)
 {
-	CString sum;
-
-	//bcos str1 + ' ' + str2
-	sum.m_length = size_strlen(data) + 1 + str2.m_length;
-
-	sum.m_data = new char[static_cast<__int64>(sum.m_length) + 1];
-
-	int index = 0;
-	for (index; index < size_strlen(data); index++)
-	{
-		sum.m_data[index] = data[index];
-	}
-
-	sum.m_data[index] = ' ';
-	++index;
-
-	for (int i = 0; i < str2.m_length; i++, index++)
-	{
-		sum.m_data[index] = str2.m_data[i];
-	}
-
-	sum.m_data[sum.m_length] = '\0';
-	return sum;
+	string::CString tmp(data);
+	return tmp + str;
 }
 
 
-//get
-const char* CString::get_char() const
+//gets whith null-term
+const char* CString::c_str() const
 {
-	if (m_data) return m_data;
-
-	return "nullString";
+    return m_data;
 }
 
 
-//get
-int CString::get_length() const	{ return m_length; }
+//gets
+uint32_t CString::length() const
+{
+    return m_length;
+}
 
 
-//
-void CString::swap(string::CString& str) 
+//data in nullptr
+bool CString::empty() const
+{
+	return m_data == nullptr;
+}
+
+
+//swap str1 <-> str2
+void CString::swap(CString& str)
 {
 	CString tmp;
 

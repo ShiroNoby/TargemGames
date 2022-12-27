@@ -104,7 +104,7 @@ namespace CS{
         
         void                swap( String& str );
         
-        size_t              append( const char*, size_t count = 0 );
+        size_t              append( const char* data, size_t count = 0 );
                        
         const char*         data() const;        
         const char*         c_str() const;  
